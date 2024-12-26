@@ -1,21 +1,22 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose"); // Correctly import mongoose
 
-// Connection URI for local MongoDB
-const mongoURI = "mongodb://127.0.0.1:27017"; // Replace with your MongoDB URI
-
-// Define a schema and model
+// Define a schema
 const testSchema = new mongoose.Schema({
   name: String,
   age: Number,
 });
 
+// Define a model
 const TestModel = mongoose.model("TestCollection", testSchema);
 
-// Test MongoDB connection and perform operations
+// Test MongoDB connection and operations
 async function testDatabase() {
   try {
     // Connect to MongoDB
-    await mongoose.connect(mongoURI, { dbName: "testDatabase" });
+    await mongoose.connect("mongodb://127.0.0.1:27017/testDatabase", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     console.log("Connected to MongoDB successfully!");
 
     // Add a test document
@@ -27,13 +28,19 @@ async function testDatabase() {
     const docs = await TestModel.find();
     console.log("Documents in TestCollection:", docs);
   } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
+    console.error("Error:", error);
   } finally {
-    // Disconnect from MongoDB
-    await mongoose.connection.close();
+    await TestModel.deleteMany({});
+    console.log("All documents deleted from TestCollection");
+
+    const docs = await TestModel.find();
+    console.log("Documents in TestCollection after cleanup:", docs);
+
+    mongoose.connection.close();
     console.log("Connection closed.");
   }
 }
 
 // Run the test
 testDatabase();
+
